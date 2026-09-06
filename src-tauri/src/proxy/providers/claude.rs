@@ -31,8 +31,11 @@ const REASONING_VENDOR_HINTS: &[&str] = &["deepseek", "mimo", "xiaomimimo"];
 // gpt-5.6-luna 解析到未部署的内部引擎（HTTP 404 Model not found，openai/codex#31967，
 // 本机 A/B 实测确认）。两个头必须成对发送，缺一即 404；version 需 ≥ 目标模型
 // catalog 的 minimal_client_version（luna=0.144.0），新模型抬门槛时同步 bump。
+// 0.144.1 仅够 luna；gpt-6-astra 抬高了门槛，旧版本会被后端拒绝（HTTP 400
+// "requires a newer version of Codex"，#7131）。对齐当前最新稳定 Codex CLI
+// （npm @openai/codex latest = 0.153.4），与真实客户端一致，越过 astra cohort 校验。
 const CODEX_OAUTH_ORIGINATOR: &str = "codex_cli_rs";
-const CODEX_OAUTH_CLIENT_VERSION: &str = "0.144.1";
+const CODEX_OAUTH_CLIENT_VERSION: &str = "0.153.4";
 
 /// 获取 Claude 供应商的 API 格式
 ///
