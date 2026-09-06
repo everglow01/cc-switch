@@ -1,0 +1,65 @@
+name: Build Linux (fix #7131)
+
+# 仅在 push 到 main 时运行；用于在云端 ubuntu runner 上编出 Linux .deb/.AppImage，
+# 跳过 updater 签名（fork 没有 TAURI_SIGNING_PRIVATE_KEY），因此无需任何 secret。
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux system deps
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config curl wget file patchelf \
+            libssl-dev libgtk-3-dev librsvg2-dev \
+            libayatana-appindicator3-dev \
+            libwebkit2gtk-4.1-dev libsoup-3.0-dev
+
+      - name: Setup pnpm
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          corepack install
+          node --version
+          pnpm --version
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Linux bundles (deb + AppImage, no updater signing)
+        run: |
+          pnpm tauri build --bundles deb,appimage \
+            --config '{"bundle":{"createUpdaterArtifacts":false}}'
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cc-switch-linux-fix7131
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
