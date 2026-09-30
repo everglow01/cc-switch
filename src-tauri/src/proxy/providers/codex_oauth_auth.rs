@@ -70,7 +70,7 @@ const CODEX_USER_AGENT: &str = "cc-switch-codex-oauth";
 // client identity. Sol and Luna are exposed to ChatGPT accounts at 0.155.0.
 // Bump together when a new model raises its minimal_client_version.
 pub(crate) const CODEX_OAUTH_ORIGINATOR: &str = "codex_cli_rs";
-pub(crate) const CODEX_OAUTH_CLIENT_VERSION: &str = "0.155.0";
+pub(crate) const CODEX_OAUTH_CLIENT_VERSION: &str = "0.159.2";
 
 /// Codex OAuth 错误
 #[derive(Debug, thiserror::Error)]
